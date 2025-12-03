@@ -5,6 +5,32 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+
+## [1.1.0] - 2025-12-03
+
+### 🧼 Modern UI Redesign
+- Completely refreshed the default pull-to-refresh UI to be modern, professional, and minimal.
+- Replaced the old progress ring with a refined three-dot spinner and subtle connecting arc.
+- Improved animations: smoother scale, rotation, and sine-based pulsing for the dots.
+
+### 🌈 Gradient & Background Improvements
+- Switched to a cleaner gradient: color at the top fading to transparent, with stops tuned for elegance.
+- Dynamic gradient intensity based on pull progress for better feedback.
+- Added a subtle top accent line when pulled sufficiently for polished visual depth.
+
+### 🎨 Defaults & Theming
+- Spinner icon is now white by default (can be overridden via `backgroundColor`).
+- Maintains compatibility with `color`, `backgroundColor`, `height`, and other customization options.
+
+### 📸 Example Update
+- Added `example.gif` showcasing the new animation.
+- Updated README with the new GIF and documentation of changes.
+
+### 🛠️ Internal
+- Simplified painter logic and removed unused fields from the state.
+- Retained public API while improving internals for performance and consistency.
+
+
 ## [1.0.0] - 2025-11-20
 
 ### 🎉 Initial Stable Release

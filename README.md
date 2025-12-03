@@ -7,13 +7,19 @@ A beautiful liquid/spring styled pull-to-refresh widget for Flutter with smooth,
 
 `SLiquidPullToRefresh` is a drop-in replacement for Flutter's `RefreshIndicator` that provides a fluid, liquid-style animation. Perfect for adding a polished, modern feel to your scrollable content with ListView, CustomScrollView, and more.
 
+## 📱 Demo
+
+![Demo](https://raw.githubusercontent.com/SoundSliced/s_liquid_pull_to_refresh/main/example/assets/example.gif)
+
+
+
 ## ✨ Features
 
 - **Fluid Animations**: Smooth liquid peak and spring effects when pulling and releasing
 - **Highly Customizable**: Control height, animation speed, spring duration, and border width
 - **Color Theming**: Customize foreground and background colors to match your app
 - **Flexible Behavior**: Toggle child opacity transitions while pulling
-- **Progress Indication**: Beautiful custom ring animation during refresh
+- **Progress Indication**: Refined minimalist three-dot spinner with subtle connecting arc
 - **Programmatic Control**: Trigger refresh programmatically using a `GlobalKey<SLiquidPullToRefreshState>`
 - **Zero Dependencies**: Pure Flutter implementation with no external dependencies
 - **Material Design**: Integrates seamlessly with Material Design themes
@@ -24,7 +30,7 @@ Add to your app's `pubspec.yaml` (after publishing to pub.dev):
 
 ```yaml
 dependencies:
-  s_liquid_pull_to_refresh: ^1.0.0
+  s_liquid_pull_to_refresh: ^1.1.0
 ```
 
 If using locally (not yet published), use a path reference:
@@ -100,7 +106,7 @@ See the full runnable example in `example/lib/main.dart`.
 | `borderWidth` | `double` | `2.0` | Stroke width of the circular progress indicator ring. |
 | `showChildOpacityTransition` | `bool` | `true` | If `true`, fades the child content while pulling. If `false`, translates the child instead. |
 | `color` | `Color?` | `Theme.colorScheme.secondars_liquid_pull_to_refresh` | Foreground color for the liquid and progress ring. |
-| `backgroundColor` | `Color?` | `Theme.canvasColor` | Background color for the inner circle of the progress indicator. |
+| `backgroundColor` | `Color?` | `Colors.white` | Background color for the spinner (default white). |
 
 ### Programmatic Refresh
 
@@ -157,7 +163,7 @@ class _MyRefreshWidgetState extends State<MyRefreshWidget> {
 SLiquidPullToRefresh(
   onRefresh: _handleRefresh,
   color: Colors.deepPurple,
-  backgroundColor: Colors.white,
+  backgroundColor: Colors.white, // spinner color (default: white)
   child: ListView(...),
 )
 ```
@@ -189,7 +195,7 @@ SLiquidPullToRefresh(
 ```dart
 SLiquidPullToRefresh(
   onRefresh: _handleRefresh,
-  showChildOpacits_liquid_pull_to_refreshTransition: false,
+  showChildOpacityTransition: false,
   child: ListView(...),
 )
 ```

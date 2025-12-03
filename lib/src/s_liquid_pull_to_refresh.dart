@@ -110,13 +110,10 @@ class SLiquidPullToRefreshState extends State<SLiquidPullToRefresh> {
   double _springValue = 0.0;
   double _progressingRotateValue = 0.0;
   double _progressingPercentValue = 0.25;
-  double _progressingStartAngleValue = -2.0 / 3.0;
-  double _ringRadiusValue = 1.0;
   double _ringOpacityValue = 1.0;
   double _peakHeightUpValue = 0.0;
   double _peakHeightDownValue = 1.0;
   double _indicatorTranslateWithPeakValue = 0.0;
-  double _indicatorRadiusWithPeakValue = 0.0;
   double _indicatorTranslateValue = 0.0;
   double _radiusValue = 1.0;
   double _positionValue = 0.0;
@@ -146,11 +143,20 @@ class SLiquidPullToRefreshState extends State<SLiquidPullToRefresh> {
     final ThemeData theme = Theme.of(context);
     final baseColor = widget.color ?? theme.colorScheme.secondary;
     final t = (_positionValue / (1.0 / _kDragSizeFactorLimit)).clamp(0.0, 1.0);
-    _valueColorValue = Color.lerp(
-      baseColor.withValues(alpha: 0.0),
-      baseColor.withValues(alpha: 1.0),
-      t,
-    );
+
+    // Use ease-in-out curve for smoother color transition
+    final curvedT = Curves.easeInOut.transform(t);
+
+    // Create more sophisticated color transition with brightness adjustment
+    final startColor = baseColor.withValues(alpha: 0.0);
+    final midColor = baseColor.withValues(alpha: 0.6);
+    final endColor = baseColor.withValues(alpha: 1.0);
+
+    if (curvedT < 0.5) {
+      _valueColorValue = Color.lerp(startColor, midColor, curvedT * 2);
+    } else {
+      _valueColorValue = Color.lerp(midColor, endColor, (curvedT - 0.5) * 2);
+    }
   }
 
   // Track all active animation cancelers
@@ -415,13 +421,10 @@ class SLiquidPullToRefreshState extends State<SLiquidPullToRefresh> {
       _springValue = 0.0;
       _progressingRotateValue = 0.0;
       _progressingPercentValue = 0.25;
-      _progressingStartAngleValue = -2.0 / 3.0;
       _ringOpacityValue = 1.0;
-      _ringRadiusValue = 1.0;
       _peakHeightUpValue = 0.0;
       _peakHeightDownValue = 1.0;
       _indicatorTranslateWithPeakValue = 0.0;
-      _indicatorRadiusWithPeakValue = 0.0;
       _indicatorTranslateValue = 0.0;
       _radiusValue = 1.0;
     });
@@ -518,8 +521,6 @@ class SLiquidPullToRefreshState extends State<SLiquidPullToRefresh> {
           _progressingRotateValue = t;
           final percent = t <= 0.5 ? 2 * t : 2 * (1 - t);
           _progressingPercentValue = 0.25 + (percent * (5 / 6 - 0.25));
-          _progressingStartAngleValue =
-              t >= 0.5 ? -2 / 3 + ((t - 0.5) * 2 * (1 / 2 - (-2 / 3))) : -2 / 3;
         });
       });
 
@@ -583,7 +584,7 @@ class SLiquidPullToRefreshState extends State<SLiquidPullToRefresh> {
 
     // assigning default color and background color
     Color defaultColor = Theme.of(context).colorScheme.secondary;
-    Color defaultBackgroundColor = Theme.of(context).canvasColor;
+    Color defaultBackgroundColor = Colors.white;
 
     // assigning default height
     double defaultHeight = 100.0;
@@ -614,7 +615,6 @@ class SLiquidPullToRefreshState extends State<SLiquidPullToRefresh> {
       children: <Widget>[
         widget.showChildOpacityTransition
             ? Opacity(
-                // -0.01 is done for elasticOut curve
                 opacity: (_positionValue - (1 / 3) - 0.01).clamp(0.0, 1.0),
                 child: child,
               )
@@ -622,56 +622,75 @@ class SLiquidPullToRefreshState extends State<SLiquidPullToRefresh> {
                 offset: Offset(0.0, _positionValue),
                 child: child,
               ),
+        // Refined gradient background with depth
         ClipPath(
           clipper: SCurveHillClipper(
             centreHeight: height,
-            curveHeight: height / 2 * _springValue, // 50.0
-            peakHeight: height *
-                3 /
-                10 *
-                ((_peakHeightUpValue != 1.0) //30.0
-                    ? _peakHeightUpValue
-                    : _peakHeightDownValue),
-            peakWidth:
-                (_peakHeightUpValue != 0.0 && _peakHeightDownValue != 0.0)
-                    ? height * 35 / 100 //35.0
-                    : 0.0,
+            curveHeight: height / 2 * _springValue,
+            peakHeight: 0,
+            peakWidth: 0,
           ),
-          child: Container(
-            height: _positionValue * height * 2, // 100.0
-            color: color,
+          child: Stack(
+            children: [
+              // Main gradient
+              Container(
+                height: _positionValue * height * 1.5,
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    colors: [
+                      color.withValues(alpha: 0.15 + (_positionValue * 0.1)),
+                      color.withValues(alpha: 0.08),
+                      color.withValues(alpha: 0.0),
+                    ],
+                    stops: const [0.0, 0.4, 1.0],
+                  ),
+                ),
+              ),
+              // Subtle top accent line for polish
+              if (_positionValue > 0.3)
+                Container(
+                  height: 2,
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.centerLeft,
+                      end: Alignment.centerRight,
+                      colors: [
+                        color.withValues(alpha: 0.0),
+                        color.withValues(alpha: 0.3),
+                        color.withValues(alpha: 0.0),
+                      ],
+                    ),
+                  ),
+                ),
+            ],
           ),
         ),
+        // Enhanced spinner indicator
         SizedBox(
-          // color: Colors.purple,
-          height: height, //100.0
+          height: height,
           child: Align(
             alignment: Alignment(
               0.0,
-              (1.0 -
-                  (0.36 * _indicatorTranslateWithPeakValue) -
-                  (0.64 * _indicatorTranslateValue)),
+              -0.2 + (_indicatorTranslateValue * 0.4),
             ),
-            child: Transform(
-              transform: Matrix4.identity()
-                ..rotateZ(_progressingRotateValue * 5 * math.pi / 6),
-              alignment: FractionalOffset.center,
-              child: _SCircularProgress(
-                backgroundColor: backgroundColor,
-                progressCircleOpacity: _ringOpacityValue,
-                innerCircleRadius: height *
-                    15 /
-                    100 * // 15.0
-                    ((_mode != _SLiquidPullToRefreshMode.done)
-                        ? _indicatorRadiusWithPeakValue
-                        : _radiusValue),
-                progressCircleBorderWidth: widget.borderWidth,
-                //2.0
-                progressCircleRadius: (_ringOpacityValue != 0.0)
-                    ? (height * 2 / 10) * _ringRadiusValue //20.0
-                    : 0.0,
-                startAngle: _progressingStartAngleValue * math.pi,
-                progressPercent: _progressingPercentValue,
+            child: Opacity(
+              opacity: _ringOpacityValue,
+              child: Transform.scale(
+                scale: 0.75 + (_ringOpacityValue * 0.25),
+                child: Transform.rotate(
+                  angle: _progressingRotateValue * 2 * math.pi,
+                  child: _SCircularProgress(
+                    backgroundColor: backgroundColor,
+                    progressCircleOpacity: _ringOpacityValue,
+                    innerCircleRadius: 0,
+                    progressCircleBorderWidth: widget.borderWidth,
+                    progressCircleRadius: height * 0.16,
+                    startAngle: 0,
+                    progressPercent: _progressingPercentValue,
+                  ),
+                ),
               ),
             ),
           ),
@@ -723,45 +742,101 @@ class _SCircularProgress extends StatefulWidget {
 class _SCircularProgressState extends State<_SCircularProgress> {
   @override
   Widget build(BuildContext context) {
-    double containerLength =
-        2 * math.max(widget.progressCircleRadius, widget.innerCircleRadius);
+    final size = widget.progressCircleRadius * 2;
 
     return SizedBox(
-      //  color: Colors.purple,
-      height: containerLength,
-      width: containerLength,
-      child: Stack(
-        children: <Widget>[
-          Opacity(
-            opacity: widget.progressCircleOpacity,
-            child: SizedBox(
-              height: widget.progressCircleRadius * 2,
-              width: widget.progressCircleRadius * 2,
-              child: CustomPaint(
-                painter: SRingPainter(
-                  startAngle: widget.startAngle,
-                  paintWidth: widget.progressCircleBorderWidth,
-                  progressPercent: widget.progressPercent,
-                  trackColor: widget.backgroundColor,
-                ),
-              ),
-            ),
+      height: size,
+      width: size,
+      child: Opacity(
+        opacity: widget.progressCircleOpacity,
+        child: CustomPaint(
+          painter: _ModernSpinnerPainter(
+            backgroundColor: widget.backgroundColor,
+            progress: widget.progressPercent,
+            strokeWidth: widget.progressCircleBorderWidth,
           ),
-          Align(
-            alignment: Alignment.center,
-            child: Container(
-              width: widget.innerCircleRadius * 2,
-              height: widget.innerCircleRadius * 2,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: widget.backgroundColor,
-              ),
-            ),
-          )
-        ],
+        ),
       ),
     );
   }
+}
+
+/// Modern minimalist spinner painter
+class _ModernSpinnerPainter extends CustomPainter {
+  final Color backgroundColor;
+  final double progress;
+  final double strokeWidth;
+
+  _ModernSpinnerPainter({
+    required this.backgroundColor,
+    required this.progress,
+    required this.strokeWidth,
+  });
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final center = Offset(size.width / 2, size.height / 2);
+    final radius = (size.width / 2) - strokeWidth;
+
+    // Draw three refined dots arranged in a circle
+    final dotRadius = strokeWidth * 1.3;
+    final dotPositions = [
+      Offset(
+        center.dx + radius * math.cos(-math.pi / 2),
+        center.dy + radius * math.sin(-math.pi / 2),
+      ),
+      Offset(
+        center.dx + radius * math.cos(-math.pi / 2 + 2 * math.pi / 3),
+        center.dy + radius * math.sin(-math.pi / 2 + 2 * math.pi / 3),
+      ),
+      Offset(
+        center.dx + radius * math.cos(-math.pi / 2 + 4 * math.pi / 3),
+        center.dy + radius * math.sin(-math.pi / 2 + 4 * math.pi / 3),
+      ),
+    ];
+
+    // Animate dots with smoother pulsing effect
+    for (int i = 0; i < dotPositions.length; i++) {
+      final phaseOffset = i / dotPositions.length;
+      final dotProgress = ((progress + phaseOffset) % 1.0);
+      // Smoother sine-based opacity curve
+      final opacity = 0.35 + (0.65 * math.sin(dotProgress * math.pi));
+
+      // Draw subtle glow for depth
+      final glowPaint = Paint()
+        ..color = backgroundColor.withValues(alpha: opacity * 0.15)
+        ..style = PaintingStyle.fill
+        ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 4);
+
+      canvas.drawCircle(dotPositions[i], dotRadius * 1.8, glowPaint);
+
+      // Draw main dot
+      final paint = Paint()
+        ..color = backgroundColor.withValues(alpha: opacity)
+        ..style = PaintingStyle.fill;
+
+      canvas.drawCircle(dotPositions[i], dotRadius, paint);
+    }
+
+    // Draw refined connecting arc with gradient-like effect
+    final arcPaint = Paint()
+      ..color = backgroundColor.withValues(alpha: 0.25)
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = strokeWidth * 0.7
+      ..strokeCap = StrokeCap.round;
+
+    final arcSweep = progress * math.pi * 2;
+    canvas.drawArc(
+      Rect.fromCircle(center: center, radius: radius),
+      -math.pi / 2,
+      arcSweep,
+      false,
+      arcPaint,
+    );
+  }
+
+  @override
+  bool shouldRepaint(_ModernSpinnerPainter oldDelegate) => true;
 }
 
 class SRingPainter extends CustomPainter {
@@ -780,35 +855,30 @@ class SRingPainter extends CustomPainter {
           ..color = trackColor
           ..style = PaintingStyle.stroke
           ..strokeWidth = paintWidth
-          ..strokeCap = StrokeCap.square;
+          ..strokeCap = StrokeCap.round;
 
   @override
   void paint(Canvas canvas, Size size) {
     final center = Offset(size.width / 2, size.height / 2);
     final radius = (math.min(size.width, size.height) - paintWidth) / 2;
-
     final progressAngle = 2 * math.pi * progressPercent;
 
     canvas.drawArc(
-        Rect.fromCircle(
-          center: center,
-          radius: radius,
-        ),
-        startAngle,
-        progressAngle,
-        false,
-        trackPaint);
+      Rect.fromCircle(center: center, radius: radius),
+      startAngle,
+      progressAngle,
+      false,
+      trackPaint,
+    );
   }
 
   @override
-  bool shouldRepaint(CustomPainter oldDelegate) {
-    return true;
-  }
+  bool shouldRepaint(CustomPainter oldDelegate) => true;
 }
 
 //********************************************************** */
 
-/// Clipper for [SLiquidPullToRefresh]
+/// Clipper for [SLiquidPullToRefresh] - Simple modern arc
 class SCurveHillClipper extends CustomClipper<Path> {
   final double centreHeight;
   double curveHeight;
@@ -832,26 +902,17 @@ class SCurveHillClipper extends CustomClipper<Path> {
 
       path.lineTo(0.0, centreHeight);
 
-      path.quadraticBezierTo(size.width / 4, centreHeight + curveHeight,
-          (size.width / 2) - (peakWidth / 2), centreHeight + curveHeight);
+      // Simple, elegant arc - minimal design
+      final arcHeight = centreHeight + (curveHeight * 0.6);
 
       path.quadraticBezierTo(
-          (size.width / 2) - (peakWidth / 4),
-          centreHeight + curveHeight - peakHeight,
-          (size.width / 2),
-          centreHeight + curveHeight - peakHeight);
-
-      path.quadraticBezierTo(
-          (size.width / 2) + (peakWidth / 4),
-          centreHeight + curveHeight - peakHeight,
-          (size.width / 2) + (peakWidth / 2),
-          centreHeight + curveHeight);
-
-      path.quadraticBezierTo(size.width * 3 / 4, centreHeight + curveHeight,
-          size.width, centreHeight);
+        size.width / 2,
+        arcHeight,
+        size.width,
+        centreHeight,
+      );
 
       path.lineTo(size.width, 0.0);
-
       path.lineTo(0.0, 0.0);
     } else {
       path.lineTo(0.0, size.height);

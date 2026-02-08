@@ -1,4 +1,4 @@
-import 'package:flutter/gestures.dart'; 
+import 'package:flutter/gestures.dart';
 import 'package:s_liquid_pull_to_refresh/s_liquid_pull_to_refresh.dart';
 
 void main() {

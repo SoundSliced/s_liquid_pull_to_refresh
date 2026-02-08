@@ -1,4 +1,3 @@
-import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:s_liquid_pull_to_refresh/s_liquid_pull_to_refresh.dart';
 

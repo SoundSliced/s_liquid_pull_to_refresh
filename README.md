@@ -30,7 +30,7 @@ Add to your app's `pubspec.yaml` (after publishing to pub.dev):
 
 ```yaml
 dependencies:
-  s_liquid_pull_to_refresh: ^2.0.0
+  s_liquid_pull_to_refresh: ^2.1.0
 ```
 
 If using locally (not yet published), use a path reference:
@@ -107,6 +107,8 @@ See the full runnable example in `example/lib/main.dart`.
 | `showChildOpacityTransition` | `bool` | `true` | If `true`, fades the child content while pulling. If `false`, translates the child instead. |
 | `color` | `Color?` | `Theme.colorScheme.secondars_liquid_pull_to_refresh` | Foreground color for the liquid and progress ring. |
 | `backgroundColor` | `Color?` | `Colors.white` | Background color for the spinner (default white). |
+| `triggerDistance` | `double?` | `null` | Customizable drag threshold distance to trigger refresh. |
+| `onDragProgress` | `void Function(double)?` | `null` | Callback reporting drag progress from 0.0 to 1.0. |
 
 ### Programmatic Refresh
 

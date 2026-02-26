@@ -30,7 +30,7 @@ Add to your app's `pubspec.yaml` (after publishing to pub.dev):
 
 ```yaml
 dependencies:
-  s_liquid_pull_to_refresh: ^2.1.0
+  s_liquid_pull_to_refresh: ^3.0.0
 ```
 
 If using locally (not yet published), use a path reference:
